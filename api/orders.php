@@ -1,0 +1,9 @@
+<?php
+require __DIR__.'/bootstrap.php';needPost();sameOrigin();$b=req();
+$name=cleanStr($b['name']??'',90);$notes=cleanStr($b['notes']??'',300);$method=$b['payment']??'';$fulfillment=$b['fulfillment']??'';
+if(strLength($name)<3||empty($b['adultConfirmed'])||!in_array($method,['Efectivo','Transferencia'],true)||!in_array($fulfillment,['Entrega','Recoger'],true))respond(['ok'=>false,'error'=>'Revisa el nombre, tu mayoría de edad y las opciones de entrega.'],422);
+$raw=$b['items']??[];if(!is_array($raw)||count($raw)>50||count($raw)<1)respond(['ok'=>false,'error'=>'Selecciona productos válidos.'],422);
+$result=writeStore(function(array &$s)use($raw,$name,$notes,$method,$fulfillment){$reserved=reservations($s);$items=[];$total=0;$seen=[];
+ foreach($raw as $line){$id=cleanStr($line['id']??'',40);$qty=(int)($line['qty']??0);if($qty<1||$qty>99||isset($seen[$id]))respond(['ok'=>false,'error'=>'Cantidades inválidas.'],422);$seen[$id]=true;$idx=findProduct($s,$id);if($idx===null||empty($s['products'][$idx]['active']))respond(['ok'=>false,'error'=>'Un producto ya no está disponible.'],409);$p=$s['products'][$idx];$avail=max(0,(int)$p['stock']-($reserved[$id]??0));if($qty>$avail)respond(['ok'=>false,'error'=>'No hay suficientes existencias de '.$p['name'].'. Disponibles: '.$avail],409);$price=($p['offerPrice']??0)>0&&$p['offerPrice']<$p['price']?(float)$p['offerPrice']:(float)$p['price'];$items[]=['id'=>$id,'name'=>$p['name'],'qty'=>$qty,'unitPrice'=>$price];$total+=$price*$qty;}
+ $o=['id'=>'LF-'.gmdate('ymd').'-'.strtoupper(bin2hex(random_bytes(3))),'name'=>$name,'notes'=>$notes,'payment'=>$method,'fulfillment'=>$fulfillment,'status'=>'pending','items'=>$items,'total'=>round($total,2),'createdAt'=>now(),'updatedAt'=>now(),'expiresAt'=>gmdate('c',time()+(int)($s['settings']['reservationMinutes']??45)*60),'source'=>'web'];array_unshift($s['orders'],$o);return $o;});
+respond(['ok'=>true,'order'=>$result],201);
