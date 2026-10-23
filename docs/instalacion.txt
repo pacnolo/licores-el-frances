@@ -1,0 +1,118 @@
+LICORES EL FRANCÉS — PRIMERA VERSIÓN DEMOSTRATIVA
+Desarrollo: Pacno Tech
+============================================================
+
+ESTRUCTURA PRINCIPAL
+- index.html                Catálogo público
+- css/styles.css            Estilo principal
+- css/responsive.css        Ajustes para celular
+- css/admin.css             Estilo del administrador
+- js/main.js                Carrito, filtros, QR y WhatsApp
+- js/admin.js               Productos, inventario, pedidos, ventas y reportes
+- js/seed.js                Productos ficticios para abrir la demo sin servidor
+- js/qr.js                  Generación local de códigos QR (licencia MIT)
+- admin/index.html          Panel administrativo
+- api/*.php                 Backend mínimo: JSON, usuarios, pedidos, imágenes
+- data/store.json           Productos, categorías, ventas, pedidos e inventario
+- data/users.json           Usuarios con contraseñas protegidas por hash
+- assets/productos/         80 ilustraciones individuales para el catálogo
+- assets/uploads/           Imágenes subidas desde administración
+- config/private.php        Clave de instalación privada
+- router.php                Protección de carpetas en servidor PHP de prueba
+
+DOS MODOS DE USO
+1. DEMOSTRACIÓN SIN SERVIDOR:
+   Abre index.html en Chrome, Edge o Firefox. La tienda utiliza el catálogo
+   de ejemplo incluido en js/seed.js. En admin/index.html puedes entrar al
+   panel de demostración. Los cambios quedan en el navegador donde se hagan.
+   NO se sincronizan entre diferentes equipos, navegadores o celulares.
+   Algunos navegadores restringen el guardado local cuando abres archivos.
+
+2. MODO FUNCIONAL CON PHP (RECOMENDADO):
+   Necesitas PHP 8.1 o posterior con JSON, sesiones y Fileinfo habilitados.
+   No necesitas SQL, MySQL ni otro motor de base de datos.
+   En Windows instala XAMPP o PHP. Para probar localmente, abre CMD en esta
+   carpeta y ejecuta:
+
+      php -S localhost:8000 router.php
+
+   Abre http://localhost:8000/ y luego http://localhost:8000/admin/
+   IMPORTANTE: en un servidor real, usa HTTPS y un hosting QUE EJECUTE PHP.
+   GitHub Pages NO ejecuta PHP, por lo que solo sirve para el modo demo.
+
+CREAR ADMINISTRADOR POR PRIMERA VEZ
+  a) Inicia el servidor PHP.
+  b) En la computadora, abre config/private.php con un editor de texto.
+  c) Copia el valor de LF_SETUP_KEY (no publiques esa clave).
+  d) Abre /admin/ y crea tu propio usuario y contraseña de al menos 12
+     caracteres. No se incluyen usuarios o contraseñas precargadas.
+  e) Guarda de forma segura las credenciales del administrador.
+  f) Después de configurar el administrador, cambia la clave de instalación
+     en config/private.php por otra aleatoria. El administrador registrado
+     seguirá funcionando.
+
+PEDIDOS Y STOCK
+ - Los productos tienen existencias físicas y unidades reservadas.
+ - Al registrar un pedido web en modo PHP, se reservan las unidades durante
+   45 minutos. Se muestra solo el total de productos. El costo de envío
+   se acuerda por WhatsApp.
+ - El cliente debe pulsar Enviar dentro de WhatsApp para avisar a la tienda.
+   Simplemente abrir WhatsApp NO significa que el mensaje se haya enviado.
+ - En administración: Confirmado / En preparación / En camino mantienen
+   la reserva. Entregado descuenta existencias físicas una vez y registra
+   la venta. Cancelado o Expirado liberan la reserva.
+ - Las ventas físicas se pueden capturar una por una o al cierre. Para
+   evitar contar dos veces una venta usa un folio/referencia único.
+ - En la versión demo local los cambios son solo locales y no ofrecen
+   bloqueo simultáneo entre dispositivos.
+
+CÓDIGOS QR
+ - Cada ficha de producto incluye QR para descargar en SVG, copiar o
+   compartir por WhatsApp.
+ - /admin/ > Códigos QR genera QR general o por producto.
+ - NO compartas QR que apunten a localhost, direcciones file:// o IP privada.
+ - Al contar con un dominio, escribe su URL pública en Administración > QR.
+ - Al cambiar un precio, la URL del producto sigue siendo la misma.
+
+DATOS DE EJEMPLO
+ - 16 categorías y 80 productos ficticios (5 en cada categoría).
+ - PRECIOS, COSTOS, STOCK E ILUSTRACIONES NO SON REALES. Deben confirmarse
+   y reemplazarse antes de publicar para compradores reales.
+ - No se han integrado cobros electrónicos, envíos automáticos de WhatsApp,
+   facturación, ni sistemas externos.
+
+AVISOS DE SEGURIDAD IMPORTANTES
+ - Las carpetas /data y /config NO deben ser públicas. Se incluyen archivos
+   .htaccess para Apache y router.php para el servidor PHP de prueba. Si
+   utilizas Nginx u otra configuración, BLOQUEA esas rutas expresamente.
+ - Usa HTTPS, limita los permisos de escritura y guarda respaldos privados.
+ - /data/backups puede incluir nombres de clientes: protege la carpeta.
+ - Ejecuta la configuración inicial ANTES de publicar el sitio.
+ - Un cliente solo debe introducir nombre y datos mínimos. No se solicita
+   información bancaria ni documentación de identidad en la web.
+ - Verifica edad al entregar; revisa permisos, horarios y publicidad local
+   antes del lanzamiento. La demo no sustituye esas verificaciones.
+
+IMÁGENES
+ - Las imágenes incluidas son ILUSTRACIONES ORIGINALES, no fotografías
+   oficiales ni anuncios de marcas específicas.
+ - Puedes subir JPG, PNG o WEBP desde Administrar > Productos al usar PHP.
+ - Si necesitas fotos reales, se debe contar con las imágenes autorizadas
+   de los productos.
+
+WHATSAPP
+ - Número configurado para los ejemplos: +52 55 2763 2157
+ - Cambiarlo requiere actualizar js/main.js, index.html y la configuración
+   de data/store.json (settings.whatsapp) para las demás vistas.
+
+CONFIGURACIÓN EN PRODUCCIÓN
+ - Comprueba que PHP puede ESCRIBIR en /data y /assets/uploads, pero los
+   usuarios de Internet no pueden LEER /data.
+ - Es preferible colocar /data fuera de la raíz pública en una instalación
+   definitiva y cambiar LF_DATA en api/bootstrap.php.
+ - Revisa el comportamiento del hosting: algunos planes gratuitos o estáticos
+   no soportan PHP y tampoco guardan archivos JSON compartidos.
+
+ARCHIVOS NO INCLUIDOS
+ - No depende de SGS, InfoSalud ni los archivos de Pacno Tech.
+ - No hay MySQL ni archivos .sql.
